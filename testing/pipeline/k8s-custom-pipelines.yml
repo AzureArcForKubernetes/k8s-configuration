@@ -22,10 +22,6 @@ stages:
   jobs:
   - template: ./templates/run-test.yml
     parameters:
-      jobName: SourceControlConfiguration
-      path: ./test/configurations/Configuration.*.Tests.ps1
-  - template: ./templates/run-test.yml
-    parameters:
       jobName: FluxConfiguration
       path: ./test/configurations/Flux.*.Tests.ps1
   - job: BuildPublishExtension
