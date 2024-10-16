@@ -275,7 +275,7 @@ class FluxConfigurationsOperations:
         self._config = input_args.pop(0) if input_args else kwargs.pop("config")
         self._serialize = input_args.pop(0) if input_args else kwargs.pop("serializer")
         self._deserialize = input_args.pop(0) if input_args else kwargs.pop("deserializer")
-        self._api_version = input_args.pop(0) if input_args else kwargs.pop("api_version")
+        self._api_version = input_args.pop(0) if input_args else kwargs.pop("api_version", "2024-04-01-preview")
 
     @distributed_trace
     def get(

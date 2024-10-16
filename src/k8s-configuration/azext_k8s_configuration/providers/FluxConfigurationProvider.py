@@ -47,7 +47,7 @@ from ..validators import (
     validate_url_with_params,
 )
 from .. import consts
-from ..vendored_sdks.v2022_07_01.models import (
+from ..vendored_sdks.v2024_04_01_preview.models import (
     FluxConfiguration,
     FluxConfigurationPatch,
     GitRepositoryDefinition,
@@ -232,6 +232,8 @@ def create_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
+    for kustomize_properties in flux_configuration.kustomizations.values():
+        kustomize_properties.wait = kustomize_properties.wait != "false"
 
     _validate_source_control_config_not_installed(
         cmd, resource_group_name, cluster_rp, cluster_type, cluster_name
@@ -382,6 +384,9 @@ def update_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
+    for kustomize_properties in flux_configuration.kustomizations.values():
+        if kustomize_properties.wait is not None:
+            kustomize_properties.wait = kustomize_properties.wait != "false"
 
     return sdk_no_wait(
         no_wait,
@@ -408,6 +413,7 @@ def create_kustomization(
     sync_interval=None,
     retry_interval=None,
     path="",
+    wait=True,
     prune=None,
     force=None,
     no_wait=False,
@@ -441,6 +447,7 @@ def create_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
+            wait=wait,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)
@@ -469,6 +476,7 @@ def update_kustomization(
     sync_interval=None,
     retry_interval=None,
     path=None,
+    wait=None,
     prune=None,
     force=None,
     no_wait=False,
@@ -502,6 +510,7 @@ def update_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
+            wait=wait,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)

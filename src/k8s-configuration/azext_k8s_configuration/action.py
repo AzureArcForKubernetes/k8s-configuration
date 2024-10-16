@@ -6,7 +6,7 @@
 
 import argparse
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from .vendored_sdks.v2022_03_01.models import (
+from .vendored_sdks.v2024_04_01_preview.models import (
     KustomizationDefinition,
     KustomizationPatchDefinition,
 )
