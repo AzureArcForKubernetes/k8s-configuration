@@ -164,7 +164,7 @@ helps[
         text: |-
           az k8s-configuration flux kustomization create --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
-          --kustomization-name my-kustomization-2 --path ./my/path --prune --force --wait false
+          --kustomization-name my-kustomization-2 --path ./my/path --prune --force --wait
 """
 
 helps[
@@ -177,7 +177,7 @@ helps[
         text: |-
           az k8s-configuration flux kustomization update --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
-          --kustomization-name my-kustomization --path ./my/new-path --prune --force --wait
+          --kustomization-name my-kustomization --path ./my/new-path --prune --force --wait false
 """
 
 helps[
