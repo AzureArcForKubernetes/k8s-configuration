@@ -15,19 +15,12 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
-            $jsonOutput = $output | ConvertFrom-Json
-            $provisioningState = $jsonOutput.provisioningState
-            $complianceState = $jsonOutput.complianceState
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
+            $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            $complianceState = ($output | ConvertFrom-Json).complianceState
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("infra").GetProperty("wait").GetBoolean()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Compliance State: $complianceState"
-            Write-Host "Json Output: $jsonOutput"
-            Write-Host "Output: $output"
-
-            if ($jsonOutput.kustomizations -and $jsonOutput.kustomizations["infra"]) {
-                $waitState = $jsonOutput.kustomizations["infra"]["wait"]
-            } else {
-                $waitState = $null
-            }
             Write-Host "Wait State: $waitState"
             if ($provisioningState -eq $SUCCEEDED -and $waitState -eq $true -and $complianceState -eq $COMPLIANT) {
                 break
@@ -47,9 +40,10 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["infra"]["wait"]
-            $pruneState = ($output | ConvertFrom-Json).kustomizations["infra"]["prune"]
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("infra").GetProperty("wait").GetBoolean()
+            $pruneState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("infra").GetProperty("prune").GetBoolean()
             $complianceState = ($output | ConvertFrom-Json).complianceState
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Compliance State: $complianceState"
@@ -73,9 +67,10 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
             $complianceState = ($output | ConvertFrom-Json).complianceState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["apps"]["wait"]
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("apps").GetProperty("wait").GetBoolean()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Compliance State: $complianceState"
             Write-Host "Wait State: $waitState"
@@ -97,9 +92,10 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["apps"]["wait"]
-            $pruneState = ($output | ConvertFrom-Json).kustomizations["apps"]["prune"]
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("apps").GetProperty("wait").GetBoolean()
+            $pruneState =  $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("apps").GetProperty("prune").GetBoolean()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Wait State: $waitState"
             Write-Host "Prune State: $pruneState"
@@ -130,8 +126,9 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $secondConfig
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["infra"]["wait"]
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("infra").GetProperty("wait").GetBoolean()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Wait State: $waitState"
             if ($provisioningState -eq $SUCCEEDED -and $waitState -eq $false) {
@@ -152,8 +149,9 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $secondConfig
+            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["apps"]["wait"]
+            $waitState = $jsonOutput.RootElement.GetProperty("kustomizations").GetProperty("apps").GetProperty("wait").GetBoolean()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Wait State: $waitState"
             if ($provisioningState -eq $SUCCEEDED -and $waitState -eq $false) {

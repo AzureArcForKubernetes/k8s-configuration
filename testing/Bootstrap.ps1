@@ -35,8 +35,8 @@ Write-Host "Onboard cluster to Azure...starting!"
 
 az group show --name $envConfig.resourceGroup
 if (!$?) {
-    Write-Host "Resource group does not exist, creating it now in region 'eastus2euap'"
-    az group create --name $envConfig.resourceGroup --location eastus2euap
+    Write-Host "Resource group does not exist, creating it now in region 'uksouth'"
+    az group create --name $envConfig.resourceGroup --location uksouth
 
     if (!$?) {
         Write-Host "Failed to create Resource Group - exiting!"
