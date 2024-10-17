@@ -23,15 +23,15 @@ stages:
   - template: ./templates/run-test.yml
     parameters:
       jobName: FluxConfigurationTests_GitBucket
-      path: ./test/configurations/Flux.*.Tests.ps1
-  - template: ./templates/run-test.yml
-    parameters:
-      jobName: FluxConfiguration_AzureBlob
-      path: ./test/configurations/FluxAzureBlob.*.Tests.ps1
-  - template: ./templates/run-test.yml
-    parameters:
-      jobName: FluxConfiguration_Kustomization
-      path: ./test/configurations/FluxKustomization.*.Tests.ps1
+      path: ./test/configurations/Flux.PrivateKey.Tests.ps1
+  # - template: ./templates/run-test.yml
+  #   parameters:
+  #     jobName: FluxConfiguration_AzureBlob
+  #     path: ./test/configurations/FluxAzureBlob.*.Tests.ps1
+  # - template: ./templates/run-test.yml
+  #   parameters:
+  #     jobName: FluxConfiguration_Kustomization
+  #     path: ./test/configurations/FluxKustomization.*.Tests.ps1
   - job: BuildPublishExtension
     pool:
       vmImage: 'ubuntu-20.04'

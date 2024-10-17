@@ -10,7 +10,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
         $KEY_ARR = [System.Tuple]::Create("rsa", $RSA_KEYPATH), [System.Tuple]::Create("ecdsa", $ECDSA_KEYPATH), [System.Tuple]::Create("ed25519", $ED25519_KEYPATH)
         foreach ($keyTuple in $KEY_ARR) {
             # Automattically say yes to overwrite with ssh-keygen
-            Write-Output "y" | ssh-keygen -t $keyTuple.Item1 -f $keyTuple.Item2 -P """"
+            Write-Output "y" | ssh-keygen -t $keyTuple.Item1 -b 4096 -m PEM -f $keyTuple.Item2 -P """"
         }
 
         $SSH_GIT_URL = "ssh://github.com/anubhav929/flux-get-started.git"
