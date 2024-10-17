@@ -22,15 +22,15 @@ stages:
   jobs:
   - template: ./templates/run-test.yml
     parameters:
-      jobName: FluxConfigurationTests-GitBucket
+      jobName: FluxConfigurationTests_GitBucket
       path: ./test/configurations/Flux.*.Tests.ps1
   - template: ./templates/run-test.yml
     parameters:
-      jobName: FluxConfiguration-AzureBlob
+      jobName: FluxConfiguration_AzureBlob
       path: ./test/configurations/FluxAzureBlob.*.Tests.ps1
   - template: ./templates/run-test.yml
     parameters:
-      jobName: FluxConfiguration-Kustomization
+      jobName: FluxConfiguration_Kustomization
       path: ./test/configurations/FluxKustomization.*.Tests.ps1
   - job: BuildPublishExtension
     pool:
