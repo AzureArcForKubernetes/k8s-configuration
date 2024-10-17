@@ -22,8 +22,16 @@ stages:
   jobs:
   - template: ./templates/run-test.yml
     parameters:
-      jobName: FluxConfiguration
-      path: ./test/configurations/Flux.Wait.Tests.ps1
+      jobName: FluxConfigurationTests-Git&Bucket
+      path: ./test/configurations/Flux.*.Tests.ps1
+  - template: ./templates/run-test.yml
+    parameters:
+      jobName: FluxConfiguration-AzureBlob
+      path: ./test/configurations/FluxAzureBlob.*.Tests.ps1
+  - template: ./templates/run-test.yml
+    parameters:
+      jobName: FluxConfiguration-Kustomization
+      path: ./test/configurations/FluxKustomization.*.Tests.ps1
   - job: BuildPublishExtension
     pool:
       vmImage: 'ubuntu-20.04'
