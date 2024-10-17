@@ -22,7 +22,7 @@ stages:
   jobs:
   - template: ./templates/run-test.yml
     parameters:
-      jobName: FluxConfigurationTests-Git&Bucket
+      jobName: FluxConfigurationTests-GitBucket
       path: ./test/configurations/Flux.*.Tests.ps1
   - template: ./templates/run-test.yml
     parameters:
