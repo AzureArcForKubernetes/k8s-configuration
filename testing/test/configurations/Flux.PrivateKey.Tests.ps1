@@ -35,7 +35,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
         foreach($configData in $CONFIG_ARR) {
             Write-Host "Creating a configuration of type $($configData.Item1)"
             Get-ChildItem -Path $TMP_DIRECTORY -File
-            az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --namespace $configData.Item1 --ssh-private-key-file $configData.Item2 --branch main --no-wait
+            $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --namespace $configData.Item1 --ssh-private-key-file $configData.Item2 --branch main --no-wait
             $? | Should -BeTrue
         }
     
