@@ -384,9 +384,9 @@ def update_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
-    for kustomize_properties in flux_configuration.kustomizations.values():
-        if kustomize_properties.wait is not None:
-            kustomize_properties.wait = kustomize_properties.wait != "false"
+    if flux_configuration.kustomizations:
+        for kustomize_properties in flux_configuration.kustomizations.values():
+            kustomize_properties.wait = kustomize_properties.wait != "false" if kustomize_properties.wait else None
 
     return sdk_no_wait(
         no_wait,
