@@ -21,6 +21,7 @@ Describe 'Basic Flux Configuration Testing' {
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Compliance State: $complianceState"
             Write-Host "Json Output: $jsonOutput"
+            Write-Host "Output: $output"
 
             if ($jsonOutput.kustomizations -and $jsonOutput.kustomizations["infra"]) {
                 $waitState = $jsonOutput.kustomizations["infra"]["wait"]
