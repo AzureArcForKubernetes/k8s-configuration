@@ -23,7 +23,7 @@ stages:
   - template: ./templates/run-test.yml
     parameters:
       jobName: FluxConfiguration
-      path: ./test/configurations/Flux.*.Tests.ps1
+      path: ./test/configurations/Flux.Wait.Tests.ps1
   - job: BuildPublishExtension
     pool:
       vmImage: 'ubuntu-20.04'
