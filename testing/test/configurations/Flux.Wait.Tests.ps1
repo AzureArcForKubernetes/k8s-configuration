@@ -15,11 +15,18 @@ Describe 'Basic Flux Configuration Testing' {
         do 
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
-            $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["infra"]["wait"]
-            $complianceState = ($output | ConvertFrom-Json).complianceState
+            $jsonOutput = $output | ConvertFrom-Json
+            $provisioningState = $jsonOutput.provisioningState
+            $complianceState = $jsonOutput.complianceState
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Compliance State: $complianceState"
+            Write-Host "Json Output: $jsonOutput"
+
+            if ($jsonOutput.kustomizations -and $jsonOutput.kustomizations["infra"]) {
+                $waitState = $jsonOutput.kustomizations["infra"]["wait"]
+            } else {
+                $waitState = $null
+            }
             Write-Host "Wait State: $waitState"
             if ($provisioningState -eq $SUCCEEDED -and $waitState -eq $true -and $complianceState -eq $COMPLIANT) {
                 break
@@ -90,8 +97,8 @@ Describe 'Basic Flux Configuration Testing' {
         {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $waitState = ($output | ConvertFrom-Json).kustomizations["infra"]["wait"]
-            $pruneState = ($output | ConvertFrom-Json).kustomizations["infra"]["prune"]
+            $waitState = ($output | ConvertFrom-Json).kustomizations["apps"]["wait"]
+            $pruneState = ($output | ConvertFrom-Json).kustomizations["apps"]["prune"]
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "Wait State: $waitState"
             Write-Host "Prune State: $pruneState"
