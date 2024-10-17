@@ -35,8 +35,8 @@ Write-Host "Onboard cluster to Azure...starting!"
 
 az group show --name $envConfig.resourceGroup
 if (!$?) {
-    Write-Host "Resource group does not exist, creating it now in region 'uksouth'"
-    az group create --name $envConfig.resourceGroup --location uksouth
+    Write-Host "Resource group does not exist, creating it now in region 'eastus2euap'"
+    az group create --name $envConfig.resourceGroup --location eastus2euap
 
     if (!$?) {
         Write-Host "Failed to create Resource Group - exiting!"
@@ -77,4 +77,4 @@ if ($?)
 Write-Host "Connecting the cluster to Arc with connectedk8s..."
 $Env:KUBECONFIG="$PSScriptRoot/tmp/KUBECONFIG"
 $Env:HELMVALUESPATH="$PSScriptRoot/bin/connectedk8s-values.yaml"
-az connectedk8s connect -g $ENVCONFIG.resourceGroup -n $ENVCONFIG.arcClusterName
+az connectedk8s connect -g $ENVCONFIG.resourceGroup -n $ENVCONFIG.arcClusterName -l uksouth
