@@ -10,7 +10,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
         $KEY_ARR = [System.Tuple]::Create("rsa", $RSA_KEYPATH), [System.Tuple]::Create("ecdsa", $ECDSA_KEYPATH), [System.Tuple]::Create("ed25519", $ED25519_KEYPATH)
         foreach ($keyTuple in $KEY_ARR) {
             # Automattically say yes to overwrite with ssh-keygen
-            Write-Output "y" | ssh-keygen -t $keyTuple.Item1 -b 4096 -m PEM -f $keyTuple.Item2 -P """"
+            Write-Output "y" | ssh-keygen -t $keyTuple.Item1 -b 4096 -m PEM -f $keyTuple.Item2 -P ""
         }
 
         $SSH_GIT_URL = "ssh://github.com/anubhav929/flux-get-started.git"
@@ -26,6 +26,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
     It 'Creates a configuration with each type of ssh private key' {
         foreach($configData in $CONFIG_ARR) {
             Write-Host "Creating a configuration of type $($configData.Item1)"
+            Get-ChildItem -Path $TMP_DIRECTORY -File
             az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --namespace $configData.Item1 --ssh-private-key-file $configData.Item2 --branch main --no-wait
             $? | Should -BeTrue
         }
