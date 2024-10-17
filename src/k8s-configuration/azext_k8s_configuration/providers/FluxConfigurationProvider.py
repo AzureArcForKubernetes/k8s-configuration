@@ -232,8 +232,6 @@ def create_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
-    for kustomize_properties in flux_configuration.kustomizations.values():
-        kustomize_properties.wait = kustomize_properties.wait != "false"
 
     _validate_source_control_config_not_installed(
         cmd, resource_group_name, cluster_rp, cluster_type, cluster_name
@@ -384,9 +382,6 @@ def update_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
-    if flux_configuration.kustomizations:
-        for kustomize_properties in flux_configuration.kustomizations.values():
-            kustomize_properties.wait = kustomize_properties.wait != "false" if kustomize_properties.wait else None
 
     return sdk_no_wait(
         no_wait,
@@ -413,9 +408,9 @@ def create_kustomization(
     sync_interval=None,
     retry_interval=None,
     path="",
-    wait=True,
     prune=None,
     force=None,
+    disable_health_check=None,
     no_wait=False,
     cluster_resource_provider=None,
 ):
@@ -447,7 +442,7 @@ def create_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
-            wait=wait,
+            wait=disable_health_check!=True,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)
@@ -476,9 +471,9 @@ def update_kustomization(
     sync_interval=None,
     retry_interval=None,
     path=None,
-    wait=None,
     prune=None,
     force=None,
+    disable_health_check=None,
     no_wait=False,
     cluster_resource_provider=None,
 ):
@@ -510,7 +505,7 @@ def update_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
-            wait=wait,
+            wait=disable_health_check!=True,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)

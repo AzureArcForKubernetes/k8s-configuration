@@ -321,9 +321,10 @@ def load_arguments(self, _):
             help="Re-create resources that cannot be updated on the cluster (i.e. jobs)",
         )
         c.argument(
-            "wait",
+            "disable_health_check",
+            options_list=["--disable-health-check"],
             arg_type=get_three_state_flag(),
-            help="Enable or disable health checks for kustomizations applied to the cluster.",
+            help="Disable health checks for kustomizations applied to the cluster."
         )
 
     with self.argument_context("k8s-configuration flux kustomization delete") as c:
