@@ -175,7 +175,7 @@ def load_arguments(self, _):
             "kustomization",
             action=KustomizationAddAction,
             options_list=["--kustomization", "-k"],
-            help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force', 'wait']",
+            help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force', 'disable_health_check']",
             nargs="+",
         )
         c.argument(
