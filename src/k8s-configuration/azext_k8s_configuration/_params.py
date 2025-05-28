@@ -65,7 +65,7 @@ def load_arguments(self, _):
         )
         c.argument(
             "kind",
-            arg_type=get_enum_type([consts.GIT, consts.BUCKET, consts.AZBLOB]),
+            arg_type=get_enum_type([consts.GIT, consts.BUCKET, consts.AZBLOB, consts.OCI]),
             help="Source kind to reconcile",
         )
         c.argument(
@@ -86,13 +86,13 @@ def load_arguments(self, _):
         )
         c.argument(
             "tag",
-            arg_group="Git Repo Ref",
-            help="Tag within the git source to reconcile with the cluster",
+            arg_group=["Git Repo Ref", "OCI Repo Ref"],
+            help="Tag within the git or OCI source to reconcile with the cluster",
         )
         c.argument(
             "semver",
-            arg_group="Git Repo Ref",
-            help="Semver range within the git source to reconcile with the cluster",
+            arg_group=["Git Repo Ref", "OCI Repo Ref"],
+            help="Semver range within the git or OCI source to reconcile with the cluster",
         )
         c.argument(
             "commit",
@@ -238,6 +238,70 @@ def load_arguments(self, _):
             options_list=["--mi-client-id", "--managed-identity-client-id"],
             help="The client ID of the managed identity for authentication with Azure Blob",
         )
+        c.argument(
+            "digest",
+            arg_group="OCI Repo Ref",
+            help="Digest of the OCI artifact to reconcile with the cluster",
+        )
+        c.argument(
+            "oci_media_type",
+            arg_group="OCI Repo Ref",
+            help="OCI artifact layer media type to select for extraction or copy.",
+        )
+        c.argument(
+            "oci_operation",
+            arg_group="OCI Repo Ref",
+            arg_type=get_enum_type(["extract", "copy"]),
+            help="Operation to perform on the selected OCI artifact layer: 'extract' to extract the layer, 'copy' to copy the tarball as-is (default: extract)",
+        )
+        c.argument(
+            "tls_ca_certificate",
+            arg_group="OCI Repository Auth",
+            help="Base64-encoded CA certificate for TLS communication with OCI repository",
+        )
+        c.argument(
+            "tls_client_certificate",
+            arg_group="OCI Repository Auth",
+            help="Base64-encoded client certificate for TLS authentication with OCI repository",
+        )
+        c.argument(
+            "tls_private_key",
+            arg_group="OCI Repository Auth",
+            help="Base64-encoded private key for TLS authentication with OCI repository",
+        )
+        c.argument(
+            "service_account_name",
+            arg_group="OCI Repository Auth",
+            help="Name of the Kubernetes service account to use for accessing the OCI repository",
+        )
+        c.argument(
+            "use_workload_identity",
+            arg_group="OCI Repository Auth",
+            help="Use workload identity for authentication with OCI repository",
+        )
+        c.argument(
+            "oci_insecure",
+            arg_type=get_three_state_flag(),
+            help="Allow connecting to an insecure (HTTP) OCI container registry.",
+        )
+        c.argument(
+            "verify_provider",
+            arg_group="OCI Repository Auth",
+            help="Provider used for verification."
+        )
+        c.argument(
+            "match_oidc_identity",
+            arg_group="OCI Repository Auth",
+            nargs="+",
+            help="List of OIDC identities to match for verification. Each entry should be a JSON string with 'issuer' and 'subject' fields."
+        )
+        c.argument(
+            "verify_config",
+            arg_group="OCI Repository Auth",
+            nargs="+",
+            help="Custom verification configuration as key=value pairs."
+        )
+        
 
     with self.argument_context("k8s-configuration flux update") as c:
         c.argument(
