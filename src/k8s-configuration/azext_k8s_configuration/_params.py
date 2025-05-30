@@ -19,6 +19,7 @@ from .validators import (
 
 from .action import (
     KustomizationAddAction,
+    VerifyConfigAction
 )
 from . import consts
 
@@ -285,21 +286,24 @@ def load_arguments(self, _):
             help="Allow connecting to an insecure (HTTP) OCI container registry.",
         )
         c.argument(
-            "verify_provider",
+            "verification_provider",
+            action=VerifyConfigAction,
             arg_group="OCI Repository Auth",
-            help="Provider used for verification."
+            help="Provider used for OCI verification."
         )
         c.argument(
             "match_oidc_identity",
+            action=VerifyConfigAction,
             arg_group="OCI Repository Auth",
             nargs="+",
-            help="List of OIDC identities to match for verification. Each entry should be a JSON string with 'issuer' and 'subject' fields."
+            help="List of OIDC identities to match for verification of OCI artifacts. Each entry should be a JSON string with 'issuer' and 'subject' fields."
         )
         c.argument(
-            "verify_config",
+            "verification_config",
+            action=VerifyConfigAction,
             arg_group="OCI Repository Auth",
             nargs="+",
-            help="Custom verification configuration as key=value pairs."
+            help="An object containing trusted public keys of trusted authors for OCI artifacts."
         )
         
 

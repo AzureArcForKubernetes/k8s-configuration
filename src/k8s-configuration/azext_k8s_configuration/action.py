@@ -80,12 +80,8 @@ class KustomizationAddAction(argparse._AppendAction):
 
 class VerifyConfigAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        # values is a dict with keys: verify_provider, match_oidc_identity, verify_config
-        # This action expects to be used with nargs=None (single value) or "+" (list)
-        # We'll handle each param separately
-
-        # Handle verify_provider (simple string)
-        if self.dest == "verify_provider":
+        # Handle verification_provider (simple string)
+        if self.dest == "verification_provider":
             setattr(namespace, self.dest, values)
             return
 
@@ -105,8 +101,8 @@ class VerifyConfigAction(argparse.Action):
             setattr(namespace, self.dest, identities)
             return
 
-        # Handle verify_config (list of key=value)
-        if self.dest == "verify_config":
+        # Handle verification_config (list of key=value)
+        if self.dest == "verification_config":
             config = {}
             for item in values:
                 try:
@@ -114,7 +110,7 @@ class VerifyConfigAction(argparse.Action):
                     config[key] = value
                 except Exception:
                     raise InvalidArgumentValueError(
-                        "Each entry for --verify-config must be in key=value format."
+                        "Each entry for --verification-config must be in key=value format."
                     )
             setattr(namespace, self.dest, config)
             return
