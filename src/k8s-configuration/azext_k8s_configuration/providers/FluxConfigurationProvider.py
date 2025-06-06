@@ -1359,7 +1359,7 @@ class OCIRepositoryGenerator(SourceKindGenerator):
         self.validate()
 
         def oci_repo_updater(config):
-            config.oci_repo = OCIRepositoryDefinition(
+            config.oci_repository = OCIRepositoryDefinition(
                 url=self.url,
                 timeout_in_seconds=parse_duration(self.timeout),
                 sync_interval_in_seconds=parse_duration(self.sync_interval),
@@ -1386,7 +1386,7 @@ class OCIRepositoryGenerator(SourceKindGenerator):
 
         def oci_repo_patch_updater(config):
             if any(kwarg is not None for kwarg in self.kwargs.values()):
-                config.oci_repo = OCIRepositoryPatchDefinition(
+                config.oci_repository = OCIRepositoryPatchDefinition(
                     url=self.url,
                     timeout_in_seconds=parse_duration(self.timeout),
                     sync_interval_in_seconds=parse_duration(self.sync_interval),

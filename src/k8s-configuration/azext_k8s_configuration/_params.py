@@ -87,12 +87,12 @@ def load_arguments(self, _):
         )
         c.argument(
             "tag",
-            arg_group=["Git Repo Ref", "OCI Repo Ref"],
+            arg_group="Git Repo Ref / OCI Repo Ref",
             help="Tag within the git or OCI source to reconcile with the cluster",
         )
         c.argument(
             "semver",
-            arg_group=["Git Repo Ref", "OCI Repo Ref"],
+            arg_group="Git Repo Ref / OCI Repo Ref",
             help="Semver range within the git or OCI source to reconcile with the cluster",
         )
         c.argument(
@@ -278,6 +278,7 @@ def load_arguments(self, _):
         c.argument(
             "use_workload_identity",
             arg_group="OCI Repository Auth",
+            arg_type=get_three_state_flag(),
             help="Use workload identity for authentication with OCI repository",
         )
         c.argument(
