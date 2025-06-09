@@ -9,7 +9,7 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
     }
 
     It 'Creates a configuration with Service Account auth' {
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --service-account-name flux_sa --kustomization name=workloadtest path=./ prune=true --no-wait
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --service-account-name "flux-sa" --kustomization name=workloadtest path=./ prune=true --no-wait
         $? | Should -BeTrue
 
         $n = 0
@@ -31,7 +31,7 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
     }
 
     It "Update service-account-name for the flux configurations on the cluster" {
-        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --service-account-name "flux_sa2" --no-wait
+        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --service-account-name "flux-sa2" --no-wait
         $? | Should -BeTrue
 
         $n = 0
