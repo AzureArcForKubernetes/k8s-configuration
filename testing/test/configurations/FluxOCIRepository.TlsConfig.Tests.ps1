@@ -1,15 +1,18 @@
-Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
+Describe 'Flux Configuration (OCI Repository - Tls Config) Testing' {
     BeforeAll {
         . $PSScriptRoot/Constants.ps1
         . $PSScriptRoot/Helper.ps1
 
         $url = "oci://ghcr.io/stefanprodan/manifests/podinfo"
-        $configurationName = "oci-service-account-config"
+        $configurationName = "oci-tls-config"
         $tag = "latest"
+        $tlsClientCertificate = "Y2xpZW50Q2VydGlmaWNhdGU="
+        $tlsPrivateKey = "cHJpdmF0ZUtleQ=="
+        $tlsCaCertificate = "Y2FDZXJ0aWZpY2F0ZQ=="
     }
 
-    It 'Creates a configuration with Service Account auth' {
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --service-account-name flux_sa --kustomization name=workloadtest path=./ prune=true --no-wait
+    It 'Creates a configuration with Tls Config Auth' {
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --tls-ca-certificate $tlsCaCertificate --tls-private-key $tlsPrivateKey --tls-ca-certificate $tlsCaCertificate --kustomization name=workloadtest path=./ prune=true --no-wait
         $? | Should -BeTrue
 
         $n = 0
@@ -18,10 +21,14 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $serviceAccountName = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("serviceAccountName").GetString()
+            $clientCertificate = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("tlsConfig").GetProperty("clientCertificate").GetString()
+            $privateKey = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("tlsConfig").GetProperty("privateKey").GetString()
+            $caCertificate = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("tlsConfig").GetProperty("caCertificate").GetString()
             Write-Host "Provisioning State: $provisioningState"
-            Write-Host "Service Account Name: $serviceAccountName"
-            if ($provisioningState -eq $SUCCEEDED -and $serviceAccountName -eq "flux_sa") {
+            Write-Host "Client Certificate: $clientCertificate"
+            Write-Host "Private Key: $privateKey"
+            Write-Host "CA Certificate: $caCertificate"
+            if ($provisioningState -eq $SUCCEEDED -and $clientCertificate -eq $tlsClientCertificate -and $privateKey -eq $tlsPrivateKey -and $caCertificate -eq $tlsCaCertificate) {
                 break
             }
             Start-Sleep -Seconds 10
@@ -30,8 +37,9 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
     }
 
-    It "Update service-account-name for the flux configurations on the cluster" {
-        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --service-account-name "flux_sa2" --no-wait
+    It "Update caCertificate for the flux configurations on the cluster" {
+        $tlsCaCertificate = "Y2FDZXJ0aWZpY2F0ZU5ldw=="
+        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --tls-ca-certificate $tlsCaCertificate --no-wait
         $? | Should -BeTrue
 
         $n = 0
@@ -40,10 +48,10 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $serviceAccountName = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("serviceAccountName").GetString()
+            $caCertificate = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("tlsConfig").GetProperty("caCertificate").GetString()
             Write-Host "Provisioning State: $provisioningState"
-            Write-Host "Service Account Name: $serviceAccountName"
-            if ($provisioningState -eq $SUCCEEDED -and $serviceAccountName -eq "flux_sa2") {
+            Write-Host "CA Certificate: $caCertificate"
+            if ($provisioningState -eq $SUCCEEDED -and $caCertificate -eq $tlsCaCertificate) {
                 break
             }
             Start-Sleep -Seconds 10
