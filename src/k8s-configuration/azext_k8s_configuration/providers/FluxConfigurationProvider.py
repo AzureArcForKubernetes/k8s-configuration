@@ -348,7 +348,7 @@ def update_config(
     match_oidc_identity=None,
     verification_config=None,
 ):
-
+    print("use workload identity", use_workload_identity)
     # Get Resource Provider to call
     cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
     validate_cc_registration(cmd)
@@ -442,6 +442,7 @@ def update_config(
         configuration_protected_settings=protected_settings,
     )
     flux_configuration = update_func(flux_configuration)
+    print(flux_configuration)
 
     return sdk_no_wait(
         no_wait,
