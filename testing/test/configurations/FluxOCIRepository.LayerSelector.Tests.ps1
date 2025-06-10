@@ -1,4 +1,4 @@
-Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
+Describe 'Flux Configuration (OCI Repository - Layer Selector) Testing' {
     BeforeAll {
         . $PSScriptRoot/Constants.ps1
         . $PSScriptRoot/Helper.ps1
@@ -6,10 +6,12 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
         $url = "oci://ghcr.io/stefanprodan/manifests/podinfo"
         $configurationName = "oci-service-account-config"
         $tag = "latest"
+        $mediaType = "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
+        $operation = "extract"
     }
 
-    It 'Creates a configuration with Service Account auth' {
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --service-account-name "flux-sa" --kustomization name=workloadtest path=./ prune=true --no-wait
+    It 'Creates a configuration with layer selector configured for oci artifact' {
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --oci-media-type $mediaType --oci-operation $operation --kustomization name=workloadtest path=./ prune=true --no-wait
         $? | Should -BeTrue
 
         $n = 0
@@ -18,10 +20,12 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $serviceAccountName = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("serviceAccountName").GetString()
+            $ociMediaType = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("layerSelector").GetProperty("mediaType").GetString()
+            $ociOperation = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("layerSelector").GetProperty("operation").GetString()
             Write-Host "Provisioning State: $provisioningState"
-            Write-Host "Service Account Name: $serviceAccountName"
-            if ($provisioningState -eq $SUCCEEDED -and $serviceAccountName -eq "flux-sa") {
+            Write-Host "OCI Media Type: $ociMediaType"
+            Write-Host "OCI Operation: $ociOperation"
+            if ($provisioningState -eq $SUCCEEDED -and $ociMediaType -eq $mediaType -and $ociOperation -eq $operation) {
                 break
             }
             Start-Sleep -Seconds 10
@@ -30,8 +34,10 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
     }
 
-    It "Update service-account-name for the flux configurations on the cluster" {
-        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --service-account-name "flux-sa2" --no-wait
+    It "Update layer selector values for oci artifact for the flux configurations on the cluster" {
+        $mediaType = "application/vnd.cncf.helm.chart.content.v2.tar+gzip"
+        $operation = "copy"
+        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --oci-media-type $mediaType --oci-operation $operation --no-wait
         $? | Should -BeTrue
 
         $n = 0
@@ -40,10 +46,12 @@ Describe 'Flux Configuration (OCI Repository - Service Account) Testing' {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $serviceAccountName = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("serviceAccountName").GetString()
+            $ociMediaType = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("layerSelector").GetProperty("mediaType").GetString()
+            $ociOperation = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("layerSelector").GetProperty("operation").GetString()
             Write-Host "Provisioning State: $provisioningState"
-            Write-Host "Service Account Name: $serviceAccountName"
-            if ($provisioningState -eq $SUCCEEDED -and $serviceAccountName -eq "flux-sa2") {
+            Write-Host "OCI Media Type: $ociMediaType"
+            Write-Host "OCI Operation: $ociOperation"
+            if ($provisioningState -eq $SUCCEEDED -and $ociMediaType -eq $mediaType -and $ociOperation -eq $operation) {
                 break
             }
             Start-Sleep -Seconds 10

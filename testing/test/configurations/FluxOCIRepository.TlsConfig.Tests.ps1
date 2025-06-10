@@ -12,7 +12,7 @@ Describe 'Flux Configuration (OCI Repository - Tls Config) Testing' {
     }
 
     It 'Creates a configuration with Tls Config Auth' {
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --tls-ca-certificate $tlsCaCertificate --tls-private-key $tlsPrivateKey --tls-ca-certificate $tlsCaCertificate --kustomization name=workloadtest path=./ prune=true --no-wait
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --tls-ca-certificate $tlsCaCertificate --tls-private-key $tlsPrivateKey --tls-client-certificate $tlsClientCertificate --kustomization name=workloadtest path=./ prune=true --no-wait
         $? | Should -BeTrue
 
         $n = 0
