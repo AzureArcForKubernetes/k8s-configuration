@@ -247,12 +247,14 @@ def load_arguments(self, _):
         c.argument(
             "oci_media_type",
             arg_group="OCI Repo Ref",
+            options_list=["--oci-media-type", "--oci-layer-selector-media-type"],
             help="OCI artifact layer media type to select for extraction or copy.",
         )
         c.argument(
             "oci_operation",
             arg_group="OCI Repo Ref",
             arg_type=get_enum_type(["extract", "copy"]),
+            options_list=["--oci-operation", "--oci-layer-selector-operation"],
             help="Operation to perform on the selected OCI artifact layer: 'extract' to extract the layer, 'copy' to copy the tarball as-is (default: extract)",
         )
         c.argument(
