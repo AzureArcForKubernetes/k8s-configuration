@@ -28,7 +28,7 @@ Describe 'Flux Configuration (OCI Repository - Tls Config) Testing' {
             Write-Host "Client Certificate: $clientCertificate"
             Write-Host "Private Key: $privateKey"
             Write-Host "CA Certificate: $caCertificate"
-            if ($provisioningState -eq $SUCCEEDED -and $clientCertificate -eq $tlsClientCertificate -and $privateKey -eq $tlsPrivateKey -and $caCertificate -eq $tlsCaCertificate) {
+            if ($provisioningState -eq $SUCCEEDED -and $clientCertificate -eq "<redacted>" -and $privateKey -eq "<redacted>" -and $caCertificate -eq "<redacted>") {
                 break
             }
             Start-Sleep -Seconds 10
@@ -51,7 +51,7 @@ Describe 'Flux Configuration (OCI Repository - Tls Config) Testing' {
             $caCertificate = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("tlsConfig").GetProperty("caCertificate").GetString()
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "CA Certificate: $caCertificate"
-            if ($provisioningState -eq $SUCCEEDED -and $caCertificate -eq $tlsCaCertificate) {
+            if ($provisioningState -eq $SUCCEEDED -and $caCertificate -eq "<redacted>") {
                 break
             }
             Start-Sleep -Seconds 10
