@@ -35,7 +35,7 @@ stages:
   - template: ./templates/run-test.yml
     parameters:
       jobName: OCIRepository_FluxConfigurationTests
-      path: ./test/configurations/FluxOCIRepository.*.Tests.ps1
+      path: ./test/configurations/FluxOCIRepository.Verify.Tests.ps1
   - job: BuildPublishExtension
     pool:
       vmImage: 'ubuntu-latest'
