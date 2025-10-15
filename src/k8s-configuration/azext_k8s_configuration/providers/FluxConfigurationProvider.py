@@ -1342,7 +1342,7 @@ class OCIRepositoryGenerator(SourceKindGenerator):
             ]
         ):
             self.verify = VerifyDefinition(
-                verification_provider=kwargs.get("verification_provider"),
+                provider=kwargs.get("verification_provider"),
                 match_oidc_identity=self.match_oidc_identities,
                 verification_config=self.verification_config,
             )
