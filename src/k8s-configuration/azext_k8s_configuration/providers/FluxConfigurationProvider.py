@@ -1370,7 +1370,7 @@ class OCIRepositoryGenerator(SourceKindGenerator):
                 repository_ref=self.repository_ref,
                 tls_config=self.tls_config,
                 verify=self.verify,
-                oci_insecure=self.oci_insecure,
+                insecure=self.oci_insecure,
             )
             config.source_kind = SourceKindType.OCI_REPOSITORY
             return config
@@ -1397,7 +1397,7 @@ class OCIRepositoryGenerator(SourceKindGenerator):
                     repository_ref=self.repository_ref,
                     tls_config=self.tls_config,
                     verify=self.verify,
-                    oci_insecure=self.oci_insecure,
+                    insecure=self.oci_insecure,
                 )
                 if swapped_kind:
                     self.validate()
