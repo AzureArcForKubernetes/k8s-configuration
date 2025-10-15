@@ -14,8 +14,11 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
     }
 
     It 'Creates a configuration with OCI verification enabled on the cluster' {
+        $oidcIdentityJsonSafe = '{"issuer":"' + $issuer + '","subject":"' + $subject + '"}'
+        Write-Host "Safe OIDC Identity JSON: $oidcIdentityJsonSafe"
+
         # Create configuration with verification settings
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --verification-provider $provider --match-oidc-identity "{`"issuer`":`"$issuer`",`"subject`":`"$subject`"}" --verification-config "$verificationConfigKey=$verificationConfigValue" --kustomization name=verificationtest path=./ prune=true --no-wait
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --verification-provider $provider --match-oidc-identity $oidcIdentityJsonSafe --verification-config "$verificationConfigKey=$verificationConfigValue" --kustomization name=verificationtest path=./ prune=true --no-wait
         $? | Should -BeTrue
 
         $n = 0
