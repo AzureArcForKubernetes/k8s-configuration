@@ -49,7 +49,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                 $providerReturned -eq $provider -and
                 $issuerReturned -eq $issuer -and
                 $subjectReturned -eq $subject -and
-                $verificationConfigReturned -eq $verificationConfigValue) {
+                $verificationConfigReturned -eq "<redacted>") {
                 break
             }
             Start-Sleep -Seconds 10
@@ -102,7 +102,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                 $providerReturned -eq $newProvider -and
                 $issuerReturned -eq $newIssuer -and
                 $subjectReturned -eq $newSubject -and
-                $verificationConfigReturned -eq $newVerificationConfigValue) {
+                $verificationConfigReturned -eq "<redacted>") {
                 break
             }
             Start-Sleep -Seconds 10
