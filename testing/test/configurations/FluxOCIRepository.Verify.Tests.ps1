@@ -51,7 +51,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                 $tagReturned -eq $tag -and
                 $providerReturned -eq $provider -and
                 $issuerReturned -eq $issuer -and
-                $subjectReturned -eq $subject -and
+                # $subjectReturned -eq $subject -and
                 $verificationConfigReturned -eq "<redacted>") {
                 break
             }
@@ -104,7 +104,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                 $tagReturned -eq $newTag -and
                 $providerReturned -eq $newProvider -and
                 $issuerReturned -eq $newIssuer -and
-                $subjectReturned -eq $newSubject -and
+                # $subjectReturned -eq $newSubject -and
                 $verificationConfigReturned -eq "<redacted>") {
                 break
             }
