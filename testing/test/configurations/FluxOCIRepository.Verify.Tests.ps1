@@ -59,6 +59,24 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             $n += 1
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+
+        # CRITICAL: Wait for STABLE Succeeded (not just first occurrence)
+        Write-Host "[Stabilization] Waiting for resource to remain Succeeded..."
+        $consecutiveSucceeded = 0
+        $stabilizationAttempts = 0
+        while ($consecutiveSucceeded -lt 3 -and $stabilizationAttempts -lt 20) {
+            Start-Sleep -Seconds 8
+            $checkOutput = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
+            $checkState = ($checkOutput | ConvertFrom-Json).provisioningState
+            Write-Host "[Stabilization] Attempt $stabilizationAttempts - State: $checkState"
+            if ($checkState -eq $SUCCEEDED) {
+                $consecutiveSucceeded++
+            } else {
+                $consecutiveSucceeded = 0  # Reset if not Succeeded
+            }
+            $stabilizationAttempts++
+        }
+        $consecutiveSucceeded | Should -BeGreaterOrEqual 3
     }
 
     It "Updates verification settings for the flux configuration on the cluster" {
@@ -126,7 +144,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             "publicKey1=Y29zaWduUHVibGljS2V5MQ==",
             "publicKey2=Y29zaWduUHVibGljS2V5Mg=="
         )
-        Start-Sleep -Seconds 20
+
         $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --verification-provider "cosign" --match-oidc-identity $multipleIdentities --verification-config $multipleVerificationConfigs --no-wait
         $? | Should -BeTrue
 
