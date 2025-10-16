@@ -126,7 +126,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             "publicKey1=Y29zaWduUHVibGljS2V5MQ==",
             "publicKey2=Y29zaWduUHVibGljS2V5Mg=="
         )
-        
+        Start-Sleep -Seconds 20
         $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --verification-provider "cosign" --match-oidc-identity $multipleIdentities --verification-config $multipleVerificationConfigs --no-wait
         $? | Should -BeTrue
 
