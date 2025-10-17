@@ -72,6 +72,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                         $tagReturned -eq $tag -and
                         $providerReturned -eq $provider -and
                         $issuerReturned -eq $issuer -and
+                        $subjectReturned -eq $subject -and
                         $verificationConfigReturned -eq "<redacted>") {
                         Write-Host "[SUCCESS] All properties match!" -ForegroundColor Green
                         break
@@ -93,6 +94,8 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
         $newProvider = "cosign"
         $newIssuer = "https://accounts.google.com"
         $newSubject = "https://github.com/example/repo/.github/workflows/build.yml@refs/heads/main"
+        $newVerificationConfigKey = "verifyKeys"
+        $newVerificationConfigValue = "Y2FDZXJ0aWZpY2F0ZU5ldw=="
 
         $newOidcIdentityJsonSafe = '{"issuer":"' + $newIssuer + '","subject":"' + $newSubject + '"}'
         Write-Host "Safe OIDC Identity JSON: $newOidcIdentityJsonSafe"
@@ -107,6 +110,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             --tag $newTag `
             --verification-provider $newProvider `
             --match-oidc-identity $newOidcIdentityJsonSafe `
+            --verification-config "$newVerificationConfigKey=$newVerificationConfigValue" `
             --no-wait 2>&1
 
         Write-Host ""
@@ -142,7 +146,9 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
                 $urlReturned -eq $newUrl -and 
                 $tagReturned -eq $newTag -and
                 $providerReturned -eq $newProvider -and
-                $issuerReturned -eq $newIssuer) {
+                $issuerReturned -eq $newIssuer -and
+                $subjectReturned -eq $newSubject -and
+                $verificationConfigReturned -eq "<redacted>") {
                 break
             }
             Start-Sleep -Seconds 10

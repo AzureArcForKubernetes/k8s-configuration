@@ -39,40 +39,40 @@ Describe 'Flux Configuration (OCI Repository - Insecure Mode) Testing' {
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
     }
 
-    # It 'Updates the configuration setting insecure mode to false' {
-    #     az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --oci-insecure=false --no-wait
-    #     $? | Should -BeTrue
+    It 'Toggle the insecure setting for ociRepo' {
+        az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --oci-insecure=false --no-wait
+        $? | Should -BeTrue
 
-    #     $n = 0
-    #     do {
-    #         $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
-    #         if ($?) {
-    #             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
-    #             $provisioningState = ($output | ConvertFrom-Json).provisioningState
-    #             $ociRepo = $jsonOutput.RootElement.GetProperty("ociRepository")
+        $n = 0
+        do {
+            $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
+            if ($?) {
+                $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
+                $provisioningState = ($output | ConvertFrom-Json).provisioningState
+                $ociRepo = $jsonOutput.RootElement.GetProperty("ociRepository")
 
-    #             $insecureFlag = $false
-    #             $hasProp = $false
-    #             try {
-    #                 $insecureFlag = $ociRepo.GetProperty("insecure").GetBoolean()
-    #                 $hasProp = $true
-    #             } catch { $hasProp = $false }
+                $insecureFlag = $false
+                $hasProp = $false
+                try {
+                    $insecureFlag = $ociRepo.GetProperty("insecure").GetBoolean()
+                    $hasProp = $true
+                } catch { $hasProp = $false }
 
-    #             Write-Host "Provisioning State: $provisioningState"
-    #             Write-Host "Insecure Present: $hasProp  Value: $insecureFlag"
+                Write-Host "Provisioning State: $provisioningState"
+                Write-Host "Insecure Present: $hasProp  Value: $insecureFlag"
 
-    #             # Accept either explicit false or property removed (treated as secure)
-    #             if ($provisioningState -eq $SUCCEEDED -and (-not $hasProp -or ($hasProp -and -not $insecureFlag))) {
-    #                 break
-    #             }
-    #         } else {
-    #             Write-Host "Show command failed (attempt $n)."
-    #         }
-    #         Start-Sleep -Seconds 10
-    #         $n += 1
-    #     } while ($n -le $MAX_RETRY_ATTEMPTS)
-    #     $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
-    # }
+                # Accept either explicit false or property removed (treated as secure)
+                if ($provisioningState -eq $SUCCEEDED -and (-not $hasProp -or ($hasProp -and -not $insecureFlag))) {
+                    break
+                }
+            } else {
+                Write-Host "Show command failed (attempt $n)."
+            }
+            Start-Sleep -Seconds 10
+            $n += 1
+        } while ($n -le $MAX_RETRY_ATTEMPTS)
+        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+    }
 
     It 'Deletes the configuration from the cluster' {
         az k8s-configuration flux delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --force
