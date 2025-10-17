@@ -133,6 +133,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             $matchOidcIdentity = $verifyElement.GetProperty("matchOidcIdentity")[0]
             $issuerReturned = $matchOidcIdentity.GetProperty("issuer").GetString()
             $subjectReturned = $matchOidcIdentity.GetProperty("subject").GetString()
+            $verificationConfigReturned = $verifyElement.GetProperty("verificationConfig").GetProperty($newVerificationConfigKey).GetString()
             
             Write-Host "Provisioning State: $provisioningState"
             Write-Host "OCI Repository URL: $urlReturned"
