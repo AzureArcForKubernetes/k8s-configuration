@@ -38,7 +38,7 @@ Describe 'Flux Configuration (OCI Repository - Tls Config) Testing' {
     }
 
     It "Update caCertificate for the flux configurations on the cluster" {
-        $tlsCaCertificate = "Y2FDZXJ0aWZpY2F0ZU5ldw=="
+        $tlsCaCertificate = "YWFDZXJ0aWZpY2F0ZU5ldw=="
         $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci --tls-ca-certificate $tlsCaCertificate --no-wait
         $? | Should -BeTrue
 
