@@ -14,14 +14,8 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
     }
 
     It 'Creates a configuration with OCI verification enabled on the cluster' {
-        $oidcIdentity = @{
-            issuer = $issuer
-            subject = $subject
-        }
-        $oidcIdentityJsonRaw = $oidcIdentity | ConvertTo-Json -Compress
-        $oidcIdentityJsonEscaped = "`"$($oidcIdentityJsonRaw -replace '"', '\"')`""
-
-        Write-Host "OIDC Identity JSON: $oidcIdentityJsonEscaped"
+        $oidcIdentityJsonSafe = '{"issuer":"' + $issuer + '","subject":"' + $subject + '"}'
+        Write-Host "Safe OIDC Identity JSON: $oidcIdentityJsonSafe"
 
         # Create configuration with verification settings
         $output = az k8s-configuration flux create `
@@ -35,7 +29,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             -u $url `
             --tag $tag `
             --verification-provider $provider `
-            --match-oidc-identity $oidcIdentityJsonEscaped `
+            --match-oidc-identity $oidcIdentityJsonSafe `
             --verification-config "$verificationConfigKey=$verificationConfigValue" `
             --kustomization name=verificationtest path=./ prune=true `
             --no-wait
@@ -102,12 +96,8 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
         $newVerificationConfigKey = "verifycert"
         $newVerificationConfigValue = "Y2FDZXJ0aWZpY2F0ZU5ldw=="
 
-        $newOidcIdentity = @{
-            issuer = $newIssuer
-            subject = $newSubject
-        }
-        $newOidcJson = $newOidcIdentity | ConvertTo-Json -Compress
-        $newOidcJsonEscaped = "`"$($newOidcJson -replace '"', '\"')`""
+        $newOidcIdentityJsonSafe = '{"issuer":"' + $newIssuer + '","subject":"' + $newSubject + '"}'
+        Write-Host "Safe OIDC Identity JSON: $newOidcIdentityJsonSafe"
 
         $output = az k8s-configuration flux update `
             -c $ENVCONFIG.arcClusterName `
@@ -118,7 +108,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             -u $newUrl `
             --tag $newTag `
             --verification-provider $newProvider `
-            --match-oidc-identity $newOidcJsonEscaped `
+            --match-oidc-identity $newOidcIdentityJsonSafe `
             --verification-config "$newVerificationConfigKey=$newVerificationConfigValue" `
             --no-wait 2>&1
 
