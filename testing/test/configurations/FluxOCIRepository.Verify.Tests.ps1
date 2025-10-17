@@ -38,7 +38,8 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
 
         $n = 0
         do 
-        {   
+        {
+            Start-Sleep -Seconds 10
             $output = az k8s-configuration flux show `
                 -c $ENVCONFIG.arcClusterName `
                 -g $ENVCONFIG.resourceGroup `
@@ -119,6 +120,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
         $n = 0
         do 
         {
+            Start-Sleep -Seconds 10
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
