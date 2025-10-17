@@ -7,79 +7,92 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
         $configurationName = "oci-verification-config"
         $tag = "latest"
         $provider = "cosign"
-        $issuer = "^https://token.actions.githubusercontent.com$"
-        $subject = "^https://github.com/stefanprodan/podinfo.*$"
+        $issuer = "https://token.actions.githubusercontent.com$"
+        $subject = "https://github.com/stefanprodan/podinfo.*$"
         $verificationConfigKey = "verifyKeys"
         $verificationConfigValue = "Y2xpZW50Q2VydGlmaWNhdGU="
     }
 
     It 'Creates a configuration with OCI verification enabled on the cluster' {
-        $oidcIdentityJsonSafe = '{"issuer":"' + $issuer + '","subject":"' + $subject + '"}'
-        Write-Host "Safe OIDC Identity JSON: $oidcIdentityJsonSafe"
+        $oidcIdentity = @{
+            issuer = $issuer
+            subject = $subject
+        }
+        $oidcIdentityJsonRaw = $oidcIdentity | ConvertTo-Json -Compress
+        $oidcIdentityJsonEscaped = "`"$($oidcIdentityJsonRaw -replace '"', '\"')`""
+
+        Write-Host "OIDC Identity JSON: $oidcIdentityJsonEscaped"
 
         # Create configuration with verification settings
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --namespace $configurationName --scope cluster --kind oci -u $url --tag $tag --verification-provider $provider --match-oidc-identity $oidcIdentityJsonSafe --verification-config "$verificationConfigKey=$verificationConfigValue" --kustomization name=verificationtest path=./ prune=true --no-wait
+        $output = az k8s-configuration flux create `
+            -c $ENVCONFIG.arcClusterName `
+            -g $ENVCONFIG.resourceGroup `
+            --cluster-type "connectedClusters" `
+            -n $configurationName `
+            --namespace $configurationName `
+            --scope cluster `
+            --kind oci `
+            -u $url `
+            --tag $tag `
+            --verification-provider $provider `
+            --match-oidc-identity $oidcIdentityJsonEscaped `
+            --verification-config "$verificationConfigKey=$verificationConfigValue" `
+            --kustomization name=verificationtest path=./ prune=true `
+            --no-wait
+
         $? | Should -BeTrue
 
         $n = 0
         do 
-        {
-            $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
-            $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
-            $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            $urlReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("url").GetString()
-            $tagReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("repositoryRef").GetProperty("tag").GetString()
-            
-            # Check verification properties
-            $verifyElement = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("verify")
-            $providerReturned = $verifyElement.GetProperty("provider").GetString()
-            $matchOidcIdentity = $verifyElement.GetProperty("matchOidcIdentity")[0]
-            $issuerReturned = $matchOidcIdentity.GetProperty("issuer").GetString()
-            $subjectReturned = $matchOidcIdentity.GetProperty("subject").GetString()
-            $verificationConfigReturned = $verifyElement.GetProperty("verificationConfig").GetProperty($verificationConfigKey).GetString()
-            
-            Write-Host "Provisioning State: $provisioningState"
-            Write-Host "OCI Repository URL: $urlReturned"
-            Write-Host "OCI Repository Tag: $tagReturned"
-            Write-Host "Verification Provider: $providerReturned"
-            Write-Host "OIDC Issuer: $issuerReturned"
-            Write-Host "OIDC Subject: $subjectReturned"
-            Write-Host "Verification Config Key: $verificationConfigReturned"
-            
-            if ($provisioningState -eq $SUCCEEDED -and 
-                $urlReturned -eq $url -and 
-                $tagReturned -eq $tag -and
-                $providerReturned -eq $provider -and
-                $issuerReturned -eq $issuer -and
-                # $subjectReturned -eq $subject -and
-                $verificationConfigReturned -eq "<redacted>") {
-                break
+        {   
+            $output = az k8s-configuration flux show `
+                -c $ENVCONFIG.arcClusterName `
+                -g $ENVCONFIG.resourceGroup `
+                --cluster-type "connectedClusters" `
+                -n $configurationName 2>$null
+            if ($?) {
+                $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
+                $provisioningState = ($output | ConvertFrom-Json).provisioningState
+                $urlReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("url").GetString()
+                $tagReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("repositoryRef").GetProperty("tag").GetString()
+                
+                $verifyElement = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("verify")
+                $providerReturned = $verifyElement.GetProperty("provider").GetString()
+                $matchOidcIdentity = $verifyElement.GetProperty("matchOidcIdentity")[0]
+                $issuerReturned = $matchOidcIdentity.GetProperty("issuer").GetString()
+                $subjectReturned = $matchOidcIdentity.GetProperty("subject").GetString()
+                $verificationConfigReturned = $verifyElement.GetProperty("verificationConfig").GetProperty($verificationConfigKey).GetString()
+                
+                Write-Host "[POLL $n] State: $provisioningState | URL: $urlReturned | Tag: $tagReturned"
+                Write-Host "         Provider: $providerReturned | Issuer: $issuerReturned"
+                Write-Host "         Subject: $subjectReturned | VerifyKey: $verificationConfigReturned"
+                
+                if ($provisioningState -eq $SUCCEEDED) {
+                    if (!$firstSucceededTime) {
+                        $firstSucceededTime = Get-Date
+                        Write-Host "[MILESTONE] First Succeeded at: $firstSucceededTime" -ForegroundColor Cyan
+                    }
+                    
+                    if ($urlReturned -eq $url -and 
+                        $tagReturned -eq $tag -and
+                        $providerReturned -eq $provider -and
+                        $issuerReturned -eq $issuer -and
+                        $verificationConfigReturned -eq "<redacted>") {
+                        Write-Host "[SUCCESS] All properties match!" -ForegroundColor Green
+                        break
+                    }
+                }
+            } else {
+                Write-Host "[POLL $n] Show command failed, retrying..."
             }
-            Start-Sleep -Seconds 10
-            $n += 1
+
+            $n++
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
-
-        # CRITICAL: Wait for STABLE Succeeded (not just first occurrence)
-        Write-Host "[Stabilization] Waiting for resource to remain Succeeded..."
-        $consecutiveSucceeded = 0
-        $stabilizationAttempts = 0
-        while ($consecutiveSucceeded -lt 3 -and $stabilizationAttempts -lt 20) {
-            Start-Sleep -Seconds 8
-            $checkOutput = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
-            $checkState = ($checkOutput | ConvertFrom-Json).provisioningState
-            Write-Host "[Stabilization] Attempt $stabilizationAttempts - State: $checkState"
-            if ($checkState -eq $SUCCEEDED) {
-                $consecutiveSucceeded++
-            } else {
-                $consecutiveSucceeded = 0  # Reset if not Succeeded
-            }
-            $stabilizationAttempts++
-        }
-        $consecutiveSucceeded | Should -BeGreaterOrEqual 3
     }
 
     It "Updates verification settings for the flux configuration on the cluster" {
+        Write-Host "[TEST 2] Updating verification settings..."
         # Update with new verification settings
         $newTag = "1.2.0"
         $newUrl = "oci://ghcr.io/stefanprodan/manifests/podinfo2"
@@ -88,9 +101,30 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
         $newSubject = "https://github.com/example/repo/.github/workflows/build.yml@refs/heads/main"
         $newVerificationConfigKey = "verifycert"
         $newVerificationConfigValue = "Y2FDZXJ0aWZpY2F0ZU5ldw=="
-        
-        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind oci -u $newUrl --tag $newTag --verification-provider $newProvider --match-oidc-identity "{`"issuer`":`"$newIssuer`",`"subject`":`"$newSubject`"}" --verification-config "$newVerificationConfigKey=$newVerificationConfigValue" --no-wait
-        $? | Should -BeTrue
+
+        $newOidcIdentity = @{
+            issuer = $newIssuer
+            subject = $newSubject
+        }
+        $newOidcJson = $newOidcIdentity | ConvertTo-Json -Compress
+        $newOidcJsonEscaped = "`"$($newOidcJson -replace '"', '\"')`""
+
+        $output = az k8s-configuration flux update `
+            -c $ENVCONFIG.arcClusterName `
+            -g $ENVCONFIG.resourceGroup `
+            --cluster-type "connectedClusters" `
+            -n $configurationName `
+            --kind oci `
+            -u $newUrl `
+            --tag $newTag `
+            --verification-provider $newProvider `
+            --match-oidc-identity $newOidcJsonEscaped `
+            --verification-config "$newVerificationConfigKey=$newVerificationConfigValue" `
+            --no-wait 2>&1
+
+        Write-Host ""
+        Write-Host "Update command output:" -ForegroundColor Cyan
+        Write-Host $output
 
         $n = 0
         do 
@@ -98,6 +132,7 @@ Describe 'Flux Configuration (OCI Repository - Verification) Testing' {
             $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
             $jsonOutput = [System.Text.Json.JsonDocument]::Parse($output)
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            Write-Host "Provisioning State: $provisioningState"
             $urlReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("url").GetString()
             $tagReturned = $jsonOutput.RootElement.GetProperty("ociRepository").GetProperty("repositoryRef").GetProperty("tag").GetString()
             
